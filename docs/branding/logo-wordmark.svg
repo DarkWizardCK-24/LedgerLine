@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 280" role="img" aria-label="Ledgerline">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#064E3B"/><stop offset=".48" stop-color="#12A06A"/><stop offset="1" stop-color="#F2C14E"/>
+    </linearGradient>
+    <linearGradient id="gloss" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".34"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#E7F7DD"/></linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFE9A8"/><stop offset="1" stop-color="#F5B83D"/></linearGradient>
+    <linearGradient id="word" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#0E8A5B"/><stop offset="1" stop-color="#D99A1B"/></linearGradient>
+  </defs>
+  <g transform="translate(10 10) scale(.5)">
+    <rect x="24" y="24" width="464" height="464" rx="118" fill="url(#bg)"/>
+    <rect x="24" y="24" width="464" height="232" rx="118" fill="url(#gloss)"/>
+    <rect x="132" y="112" width="68" height="290" rx="22" fill="url(#paper)"/>
+    <rect x="132" y="334" width="238" height="68" rx="22" fill="url(#paper)"/>
+    <rect x="246" y="140" width="136" height="38" rx="19" fill="url(#gold)"/>
+    <rect x="246" y="206" width="136" height="38" rx="19" fill="url(#gold)"/>
+    <circle cx="400" cy="298" r="14" fill="#FFE9A8"/>
+  </g>
+  <text x="300" y="152" font-family="Fraunces, Georgia, 'Times New Roman', serif" font-size="104" font-weight="700" letter-spacing="-2" fill="#0B3B2C">Ledger<tspan fill="url(#word)">line</tspan></text>
+  <text x="304" y="206" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="30" font-weight="600" letter-spacing="7" fill="#5F7A6D">DOUBLE-ENTRY ACCOUNTING</text>
+</svg>

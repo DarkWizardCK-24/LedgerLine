@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Balanced books illustration">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#03281F"/><stop offset=".55" stop-color="#0A6B49"/><stop offset="1" stop-color="#1FA971"/>
+    </linearGradient>
+    <radialGradient id="sun" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#FFE9A8"/><stop offset=".55" stop-color="#F5B83D" stop-opacity=".85"/><stop offset="1" stop-color="#F5B83D" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="coral" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#FF9B7A" stop-opacity=".75"/><stop offset="1" stop-color="#FF9B7A" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity=".97"/><stop offset="1" stop-color="#E9F6E4" stop-opacity=".95"/>
+    </linearGradient>
+    <linearGradient id="bar" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#0E8A5B"/><stop offset="1" stop-color="#7FD6A0"/>
+    </linearGradient>
+    <linearGradient id="barGold" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#E2A22B"/><stop offset="1" stop-color="#FFE08A"/>
+    </linearGradient>
+    <linearGradient id="coin" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFE9A8"/><stop offset="1" stop-color="#E4A21F"/>
+    </linearGradient>
+    <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#B7E36B"/><stop offset="1" stop-color="#14A36B"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="22" stdDeviation="22" flood-color="#021A14" flood-opacity=".45"/>
+    </filter>
+  </defs>
+  <rect width="800" height="900" fill="url(#sky)"/>
+  <circle cx="640" cy="170" r="210" fill="url(#sun)"/>
+  <circle cx="120" cy="760" r="260" fill="url(#coral)"/>
+  <!-- layered hills -->
+  <path d="M0 640 C 160 560 300 600 430 560 S 700 520 800 570 V900 H0Z" fill="#0A5E41" opacity=".55"/>
+  <path d="M0 720 C 140 650 320 700 470 650 S 710 640 800 690 V900 H0Z" fill="#064E3B" opacity=".75"/>
+  <path d="M0 800 C 180 750 330 790 500 750 S 720 745 800 780 V900 H0Z" fill="#03281F"/>
+
+  <!-- balance sheet card -->
+  <g filter="url(#shadow)" transform="rotate(-4 330 390)">
+    <rect x="130" y="230" width="400" height="300" rx="34" fill="url(#card)"/>
+    <rect x="164" y="266" width="120" height="14" rx="7" fill="#0B3B2C" opacity=".85"/>
+    <rect x="164" y="292" width="76" height="10" rx="5" fill="#0B3B2C" opacity=".28"/>
+    <rect x="178" y="410" width="46" height="84" rx="12" fill="url(#bar)"/>
+    <rect x="236" y="380" width="46" height="114" rx="12" fill="url(#barGold)"/>
+    <rect x="294" y="340" width="46" height="154" rx="12" fill="url(#bar)"/>
+    <rect x="352" y="365" width="46" height="129" rx="12" fill="url(#barGold)"/>
+    <rect x="410" y="318" width="46" height="176" rx="12" fill="url(#bar)"/>
+    <path d="M178 400 C 250 360 330 340 456 292" fill="none" stroke="#F28B6B" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="456" cy="292" r="11" fill="#F28B6B" stroke="#fff" stroke-width="5"/>
+  </g>
+
+  <!-- two equal ledger lines: debit = credit -->
+  <g filter="url(#shadow)" transform="rotate(5 560 560)">
+    <rect x="400" y="520" width="300" height="150" rx="30" fill="url(#card)"/>
+    <rect x="434" y="560" width="170" height="20" rx="10" fill="url(#coin)"/>
+    <rect x="434" y="604" width="170" height="20" rx="10" fill="url(#coin)"/>
+    <text x="630" y="580" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="700" fill="#0B3B2C">Dr</text>
+    <text x="630" y="624" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="700" fill="#0B3B2C">Cr</text>
+  </g>
+
+  <!-- coins -->
+  <g filter="url(#shadow)">
+    <ellipse cx="176" cy="672" rx="74" ry="24" fill="#B9801A"/>
+    <rect x="102" y="636" width="148" height="36" fill="#D99A1B"/>
+    <ellipse cx="176" cy="636" rx="74" ry="24" fill="url(#coin)"/>
+    <ellipse cx="190" cy="604" rx="62" ry="20" fill="#B9801A"/>
+    <rect x="128" y="574" width="124" height="30" fill="#D99A1B"/>
+    <ellipse cx="190" cy="574" rx="62" ry="20" fill="url(#coin)"/>
+    <text x="190" y="582" text-anchor="middle" font-family="Georgia, serif" font-size="26" font-weight="700" fill="#8A5A0A">₹</text>
+  </g>
+
+  <!-- sprout -->
+  <g transform="translate(640 700)">
+    <path d="M0 0 C -4 -60 -2 -110 6 -150" fill="none" stroke="#0A6B49" stroke-width="9" stroke-linecap="round"/>
+    <path d="M4 -90 C -60 -100 -84 -150 -80 -190 C -30 -180 2 -140 4 -90Z" fill="url(#leaf)"/>
+    <path d="M6 -120 C 60 -135 92 -184 86 -226 C 36 -214 4 -170 6 -120Z" fill="url(#leaf)" opacity=".92"/>
+  </g>
+  <!-- sparkles -->
+  <g fill="#FFF3C4">
+    <circle cx="80" cy="150" r="5"/><circle cx="330" cy="110" r="4"/><circle cx="720" cy="360" r="5"/><circle cx="540" cy="760" r="4"/>
+  </g>
+</svg>
