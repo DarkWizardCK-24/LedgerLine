@@ -98,4 +98,14 @@
 - [x] Phase 7: backend 390 tests (SQLite + real Postgres 16), web 14 unit tests, 31 end-to-end checks at 360/390/768/1440 px
 - [x] Phase 8: production documentation (deployment, monitoring, backup/recovery)
 - [ ] Not verified: real Supabase sign-in/hosting, real devices, iOS Safari, screen reader; rate limits for import/export; e-mailed invitations
-
+## Ledgerline, second release
+- [x] Money in / out / transfer quick entry, shortcuts, repeat last, plain-language hints, guided setup, opening balances
+- [x] Templates and recurring entries (reminders, catch-up, one occurrence per period)
+- [x] Receipts (photo or PDF) on entries, checked by file content
+- [x] Contacts, invoices and bills with payments, void, aging, GST codes and GST summary
+- [x] Cash-flow statement (reconciles to the books) and budgets with budget vs actual
+- [x] Import from Lensly, Ledgerly and Excel/CSV as drafts; bulk post
+- [x] Approvals (second-person or admin-only), send back with a note
+- [x] Year-end close with preview; reversible
+- [x] Invitation e-mails and scheduled report e-mails (tested with mocks)
+- [ ] Not built: multi-currency; not verified: real SMTP / Supabase invitation delivery, real devices

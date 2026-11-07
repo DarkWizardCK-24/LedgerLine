@@ -10,7 +10,8 @@
     "test": "vitest run",
     "e2e": "node e2e/ledgerline.e2e.js",
     "typecheck": "tsc --noEmit",
-    "screenshots": "node e2e/screenshots.js"
+    "screenshots": "node e2e/screenshots.js",
+    "e2e:features": "node e2e/features.e2e.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.2",

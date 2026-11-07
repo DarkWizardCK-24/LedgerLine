@@ -57,3 +57,21 @@ describe("display formatting", () => {
     expect(isNegative("2000.00")).toBe(false);
   });
 });
+
+
+import { lineTotals, mulDiv } from "./money";
+
+describe("invoice maths", () => {
+  it("rounds half to even, exactly", () => {
+    expect(mulDiv(5n, 1n, 2n)).toBe(2n); // 2.5 -> 2
+    expect(mulDiv(7n, 1n, 2n)).toBe(4n); // 3.5 -> 4
+    expect(mulDiv(-5n, 1n, 2n)).toBe(-2n);
+    expect(mulDiv(10n, 3n, 4n)).toBe(8n); // 7.5 -> 8
+  });
+  it("matches the server for a typical line", () => {
+    expect(lineTotals("10", "1000", "18.0000", 2)).toEqual({ net: 1_000_000n, tax: 180_000n }); // 10 x 1,000.00 at 18%
+    expect(lineTotals("2", "250.50", "5", 2)).toEqual({ net: 50_100n, tax: 2_505n });           // 501.00 + 25.05
+    expect(lineTotals("1.5", "100", null, 2)).toEqual({ net: 15_000n, tax: 0n });
+    expect(lineTotals("x", "100", null, 2)).toBeNull();
+  });
+});

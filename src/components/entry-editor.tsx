@@ -8,6 +8,7 @@ import { today } from "@/lib/dates";
 import { fromMinor, money, toMinor } from "@/lib/money";
 import { errorMessage, useOrg, useOrgQuery } from "@/lib/org";
 import type { Account, Entry, Page } from "@/lib/types";
+import { Hint, GLOSSARY } from "./hint";
 import { Button, Card, Field, Input, Select, cx, useToast } from "./ui";
 
 type Row = { key: number; account_id: string; side: "debit" | "credit"; amount: string; description: string };
@@ -89,6 +90,7 @@ export function EntryEditor({ entry, onSaved }: { entry?: Entry; onSaved?: () =>
         </div>
       </Card>
 
+      <p className="mt-3 px-1 text-sm"><Hint label="What are debit and credit?">{GLOSSARY.debitCredit}</Hint></p>
       <div className="mt-4 space-y-3">
         {rows.map((r, i) => (
           <Card key={r.key} className="space-y-3 p-4 anim-rise">

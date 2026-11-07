@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { Title } from "@/components/page";
 import { Button, Card, Chips, ErrorState, Field, Input, Skeleton, cx, useToast } from "@/components/ui";
+import { Hint, GLOSSARY } from "@/components/hint";
+import { ExtraReports, type ExtraTab } from "@/components/more-reports";
 import { downloadFile } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { fyStart, today } from "@/lib/dates";
@@ -12,7 +14,7 @@ import { money } from "@/lib/money";
 import { errorMessage, useOrg, useOrgQuery } from "@/lib/org";
 import type { BalanceSheet, ProfitLoss, ReportSection, TrialBalance } from "@/lib/types";
 
-type Tab = "pl" | "bs" | "tb";
+type Tab = "pl" | "bs" | "tb" | ExtraTab;
 
 export default function ReportsPage() {
   const { org } = useOrg();
@@ -28,6 +30,7 @@ export default function ReportsPage() {
   const pl = useOrgQuery<ProfitLoss>(["r-pl"], "/reports/profit-loss", { start_date: from, end_date: to, compare: compare ? "true" : undefined }, tab === "pl");
   const bs = useOrgQuery<BalanceSheet>(["r-bs"], "/reports/balance-sheet", { as_of: to }, tab === "bs");
   const tb = useOrgQuery<TrialBalance>(["r-tb"], "/reports/trial-balance", { as_of: to, include_zero: zero ? "true" : undefined }, tab === "tb");
+  const extra = tab === "cf" || tab === "bud" || tab === "gst";
   const active = tab === "pl" ? pl : tab === "bs" ? bs : tb;
 
   const exportAs = async (format: "csv" | "pdf") => {
@@ -42,9 +45,10 @@ export default function ReportsPage() {
 
   return (
     <div>
-      <Title sub="Calculated live from posted entries." action={<div className="flex gap-2"><Button variant="secondary" size="sm" onClick={() => exportAs("pdf")}><FileText className="size-4" /> PDF</Button><Button variant="secondary" size="sm" onClick={() => exportAs("csv")}><Download className="size-4" /> CSV</Button></div>}>Reports</Title>
-      <Chips value={tab} onChange={setTab} options={[{ value: "pl", label: "Profit & loss" }, { value: "bs", label: "Balance sheet" }, { value: "tb", label: "Trial balance" }]} />
+      <Title sub="Calculated live from posted entries." action={extra ? undefined : <div className="flex gap-2"><Button variant="secondary" size="sm" onClick={() => exportAs("pdf")}><FileText className="size-4" /> PDF</Button><Button variant="secondary" size="sm" onClick={() => exportAs("csv")}><Download className="size-4" /> CSV</Button></div>}>Reports</Title>
+      <Chips value={tab} onChange={setTab} options={[{ value: "pl", label: "Profit & loss" }, { value: "bs", label: "Balance sheet" }, { value: "tb", label: "Trial balance" }, { value: "cf", label: "Cash flow" }, { value: "bud", label: "Budget vs actual" }, { value: "gst", label: "GST" }]} />
 
+      {extra ? <ExtraReports tab={tab as ExtraTab} /> : (<>
       <Card className="mt-4 space-y-3 p-4">
         <div className={tab === "pl" ? "grid grid-cols-2 gap-3" : "grid gap-3"}>
           {tab === "pl" ? <Field label="From">{(id) => <Input id={id} type="date" value={from} onChange={(e) => setFrom(e.target.value)} />}</Field> : null}
@@ -85,6 +89,7 @@ export default function ReportsPage() {
             )}
             {tab === "tb" && tb.data && (
               <div className="space-y-4">
+                <p className="text-sm"><Hint label="What is a trial balance?">{GLOSSARY.trialBalance}</Hint></p>
                 <Card className="overflow-hidden">
                   <div className="grid grid-cols-[1fr_auto_auto] gap-x-4 bg-surface-muted px-4 py-2 text-xs font-bold uppercase tracking-wider text-muted"><span>Account</span><span className="w-24 text-right sm:w-32">Debit</span><span className="w-24 text-right sm:w-32">Credit</span></div>
                   <ul className="divide-y divide-border">
@@ -104,6 +109,7 @@ export default function ReportsPage() {
           </>
         )}
       </div>
+      </>)}
     </div>
   );
 }

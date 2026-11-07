@@ -57,6 +57,44 @@ async function api(method, p, org, data) {
   for (const g of sug.slice(0, sug.length - 1)) await api('POST', `/reconciliations/${s.id}/match`, org.id, { item_id: g.item_id, journal_entry_line_id: g.candidates[0].line_id });
   const firstEntry = (await api('GET', '/journal-entries?status=posted&page_size=1', org.id)).items[0];
 
+
+  // ---- the second feature set: GST, customers, invoices and bills, recurring entries, budgets, templates, a pending approval
+  const BOB = '22222222-2222-4222-8222-222222222222';
+  const bobTok = (() => { const hh = b64({ alg: 'HS256', typ: 'JWT' }), bb = b64({ sub: BOB, aud: 'authenticated', email: 'bob@example.com', exp: Math.floor(Date.now() / 1000) + 7200 }); return `${hh}.${bb}.${crypto.createHmac('sha256', SECRET).update(`${hh}.${bb}`).digest('base64url')}`; })();
+  const day = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
+  await api('POST', '/tax-codes/seed-gst', org.id);
+  const tax = Object.fromEntries((await api('GET', '/tax-codes', org.id)).map((t) => [t.name, t.id]));
+  const acme = await api('POST', '/contacts', org.id, { name: 'Acme Retail', kind: 'customer', email: 'accounts@acme.example', tax_id: '29ABCDE1234F1Z5' });
+  const beta = await api('POST', '/contacts', org.id, { name: 'Beta Stores', kind: 'customer' });
+  const paper = await api('POST', '/contacts', org.id, { name: 'Paper Co', kind: 'vendor' });
+  const mkInv = async (contact, due, lines, pay) => {
+    const inv = await api('POST', '/invoices', org.id, { contact_id: contact.id, issue_date: day(due - 30), due_date: day(due), reference: 'PO-' + Math.floor(Math.random() * 900 + 100), lines });
+    await api('POST', `/invoices/${inv.id}/issue`, org.id);
+    if (pay) await api('POST', `/invoices/${inv.id}/payments`, org.id, { payment_date: day(-1), amount: String(pay), account_id: id['1100'] });
+    return inv;
+  };
+  const svc = (price, qty = 1, t = 'GST 18% (sales)') => [{ description: 'Consulting services', quantity: String(qty), unit_price: String(price), account_id: id['4100'], tax_code_id: tax[t] }];
+  await mkInv(acme, -20, svc(24000, 1), 0);
+  await mkInv(beta, 10, svc(15000, 2), 0);
+  await mkInv(acme, -50, svc(9000, 1), 9000 * 1.18);
+  const open = await mkInv(beta, -5, svc(5000, 3), 5000);
+  await api('POST', '/invoices', org.id, { contact_id: acme.id, issue_date: day(0), due_date: day(30), lines: svc(12000, 1) });
+  const bill = await api('POST', '/bills', org.id, { contact_id: paper.id, issue_date: day(-12), due_date: day(18), lines: [{ description: 'Office paper', quantity: '40', unit_price: '250', account_id: id['6500'], tax_code_id: tax['GST 18% (purchases)'] }] });
+  await api('POST', `/bills/${bill.id}/issue`, org.id);
+  const tmpl = (name, kind, desc, a, b, amt, extra = {}) => api('POST', '/templates', org.id, { name, kind, description: desc, lines: kind === 'money_in' ? [{ account_id: id[a], debit_amount: amt }, { account_id: id[b], credit_amount: amt }] : [{ account_id: id[b], debit_amount: amt }, { account_id: id[a], credit_amount: amt }], ...extra });
+  await tmpl('Shop rent', 'money_out', 'Shop rent', '1100', '6100', '45000', { is_recurring: true, frequency: 'monthly', next_run_date: day(-3) });
+  await tmpl('Staff salaries', 'money_out', 'Staff salaries', '1100', '6000', '70000', { is_recurring: true, frequency: 'monthly', next_run_date: day(12), auto_post: true });
+  await tmpl('Internet bill', 'money_out', 'Internet', '1100', '6200', '1499', { is_recurring: true, frequency: 'monthly', next_run_date: day(20) });
+  await tmpl('Weekly sales', 'money_in', 'Weekly cash sales', '1000', '4000', '60000');
+  for (const [acct, amt] of [['4000', 600000], ['4100', 300000], ['6100', 45000], ['6000', 70000], ['6300', 30000], ['6200', 12000]]) {
+    for (const m of ['2026-04', '2026-05', '2026-06']) void m;
+    await api('PUT', '/account-budgets', org.id, { account_id: id[acct], start_month: '2026-04', end_month: '2027-03', amount: String(amt / 12 | 0) });
+  }
+  await api('POST', `/organizations/${org.id}/members`, null, { user_id: BOB, role: 'accountant' });
+  await api('PATCH', '/accounting/settings', org.id, { approval_mode: 'different_user' });
+  const prep = await api('POST', '/journal-entries', org.id, { entry_date: day(-2), description: 'Courier and packing charges', lines: [{ account_id: id['6900'], debit_amount: '3850', credit_amount: '0' }, { account_id: id['1100'], debit_amount: '0', credit_amount: '3850' }] }, bobTok);
+  await api('POST', `/journal-entries/${prep.id}/submit`, org.id, null, bobTok);
+
   const browser = await chromium.launch();
   const session = { accessToken: TOKEN, refreshToken: 'x', expiresAt: Date.now() + 3.6e6, userId: ALICE, email: 'aarav@example.com', displayName: 'Aarav' };
   const ctxFor = async (opts, signedIn = true) => {
@@ -67,7 +105,7 @@ async function api(method, p, org, data) {
   const MOBILE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true };
   const DESK = { viewport: { width: 1440, height: 1650 }, deviceScaleFactor: 1 }; // tall: the sticky sidebar then fills full-page captures
   const snap = async (p, dir, name, full = false) => { await p.waitForTimeout(900); await p.screenshot({ path: path.join(OUT, dir, name + '.png'), fullPage: full }); console.log('  ', dir + '/' + name); };
-  const go = async (p, route, ready) => { await p.goto(WEB + route); await p.locator(ready).first().waitFor({ timeout: 20000 }); };
+  const go = async (p, route, ready) => { await p.goto(WEB + route); await p.locator('main').locator(ready).first().waitFor({ timeout: 20000 }); };
 
   // ---------------------------------------------------------------- phone
   console.log('phone');
@@ -95,6 +133,26 @@ async function api(method, p, org, data) {
   await m.keyboard.press('Escape'); await m.getByRole('button', { name: 'Search' }).click(); await m.getByLabel('Search accounts and entries').fill('rent'); await m.waitForSelector('text=Shop rent for April'); await snap(m, 'mobile', '17-search');
   await mc.close();
 
+  // ---- new features (phone)
+  console.log('phone: features');
+  const mf = await ctxFor(MOBILE); const f = await mf.newPage();
+  await go(f, '/', 'text=Where the money goes'); await f.getByRole('button', { name: 'Add a transaction' }).click(); await f.waitForSelector('text=Documents'); await snap(f, 'mobile', '18-add-menu');
+  await f.getByText('Sales, customer payments, loans received').click(); await f.getByRole('button', { name: /Weekly sales/ }).first().click(); await snap(f, 'mobile', '19-quick-money-in');
+  await f.keyboard.press('Escape');
+  await go(f, '/setup/opening-balances', 'text=Opening balances'); await f.getByLabel('Opening balance for Bank Account').fill('250000'); await f.getByLabel('Opening balance for Loans Payable').fill('100000'); await f.getByRole('button', { name: 'Preview' }).click(); await f.waitForSelector('text=What will be recorded'); await snap(f, 'mobile', '20-opening-balances');
+  await go(f, '/invoices', 'text=Customers owe you'); await snap(f, 'mobile', '21-invoices');
+  const firstInv = (await api('GET', '/invoices?status=open&page_size=1', org.id)).items[0];
+  await go(f, `/invoices/${firstInv.id}?type=invoice`, 'text=Record payment received'); await snap(f, 'mobile', '22-invoice-detail', true);
+  await go(f, '/invoices?tab=aging', 'text=Customers owe you'); await f.waitForSelector('text=Acme Retail'); await snap(f, 'mobile', '23-aging');
+  await go(f, '/recurring', 'text=due now'); await snap(f, 'mobile', '24-recurring');
+  await go(f, '/reports', 'text=Net profit'); await f.getByRole('tab', { name: 'Cash flow' }).click(); await f.waitForSelector('text=Matches your bank and cash balances exactly.'); await snap(f, 'mobile', '25-cash-flow', true);
+  await f.getByRole('tab', { name: 'Budget vs actual' }).click(); await f.waitForSelector('text=of plan'); await snap(f, 'mobile', '26-budget-vs-actual', true);
+  await f.getByRole('tab', { name: 'GST' }).click(); await f.waitForSelector('text=GST to pay'); await snap(f, 'mobile', '27-gst');
+  await go(f, '/import', 'text=Import'); await f.getByRole('tab', { name: 'Excel or CSV file' }).click(); await snap(f, 'mobile', '28-import');
+  await go(f, '/approvals', 'text=Courier and packing charges'); await snap(f, 'mobile', '29-approvals');
+  await go(f, '/journal/new', 'text=Line 1'); await f.getByRole('button', { name: 'What are debit and credit?' }).click(); await snap(f, 'mobile', '30-plain-language-hint');
+  await mf.close();
+
   // ---------------------------------------------------------------- desktop
   console.log('desktop');
   const dc = await ctxFor(DESK); const d = await dc.newPage();
@@ -108,6 +166,20 @@ async function api(method, p, org, data) {
   await go(d, `/reconciliation/${s.id}`, 'text=Difference to explain'); await snap(d, 'desktop', '08-reconciliation', true);
   await go(d, '/settings', 'text=Financial periods'); await snap(d, 'desktop', '09-settings', true);
   await dc.close();
+
+  // ---- new features (desktop)
+  console.log('desktop: features');
+  const df = await ctxFor(DESK); const g = await df.newPage();
+  await go(g, '/', 'text=Where the money goes'); await snap(g, 'desktop', '12-dashboard-with-setup', true);
+  await go(g, '/invoices', 'text=Customers owe you'); await snap(g, 'desktop', '13-invoices', true);
+  const invOpen = (await api('GET', '/invoices?status=open&page_size=1', org.id)).items[0];
+  await go(g, `/invoices/${invOpen.id}?type=invoice`, 'text=Record payment received'); await snap(g, 'desktop', '14-invoice-detail', true);
+  await go(g, '/reports', 'text=Net profit'); await g.getByRole('tab', { name: 'Cash flow' }).click(); await g.waitForSelector('text=Matches your bank and cash balances exactly.'); await snap(g, 'desktop', '15-cash-flow', true);
+  await g.getByRole('tab', { name: 'Budget vs actual' }).click(); await g.waitForSelector('text=of plan'); await snap(g, 'desktop', '16-budget-vs-actual', true);
+  await go(g, '/recurring', 'text=due now'); await snap(g, 'desktop', '17-recurring', true);
+  await go(g, '/invoices/new?type=invoice', 'text=New invoice'); await snap(g, 'desktop', '18-new-invoice', true);
+  await go(g, '/settings', 'text=Reports by e-mail'); await snap(g, 'desktop', '19-settings-team-and-controls', true);
+  await df.close();
   const kc = await ctxFor({ ...DESK, colorScheme: 'dark' }); const k = await kc.newPage();
   await go(k, '/', 'text=Where the money goes'); await snap(k, 'desktop', '10-dashboard-dark', true);
   await kc.close();

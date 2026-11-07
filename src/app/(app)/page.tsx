@@ -1,15 +1,16 @@
 "use client";
 
-import { ArrowDownRight, ArrowUpRight, CircleCheck, Landmark, Lock, PiggyBank, Scale, TriangleAlert, Wallet } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, CalendarClock, CircleCheck, FileText, Landmark, Lock, PiggyBank, Scale, TriangleAlert, Wallet } from "lucide-react";
 import Link from "next/link";
 import { useMemo } from "react";
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { PALETTE, Title } from "@/components/page";
+import { SetupCard } from "@/components/setup-card";
 import { Badge, Button, Card, EmptyState, ErrorState, Skeleton } from "@/components/ui";
 import { fmtDate, fyStart, monthLabel, today } from "@/lib/dates";
 import { compact, fromMinor, money, toMinor } from "@/lib/money";
 import { useOrg, useOrgQuery } from "@/lib/org";
-import type { BalanceSheet, Entry, Overview, Page, ProfitLoss } from "@/lib/types";
+import type { Aging, BalanceSheet, Entry, Overview, Page, ProfitLoss, Template } from "@/lib/types";
 
 export default function Dashboard() {
   const { org, can } = useOrg();
@@ -19,6 +20,10 @@ export default function Dashboard() {
   const pl = useOrgQuery<ProfitLoss>(["dash-pl"], "/reports/profit-loss", { start_date: start, end_date: end, monthly: "true" });
   const recent = useOrgQuery<Page<Entry>>(["dash-recent"], "/journal-entries", { page_size: "5", status: "posted" });
   const ov = useOrgQuery<Overview>(["overview"], "/accounting/overview");
+  const due = useOrgQuery<Template[]>(["due"], "/recurring/due");
+  const ar = useOrgQuery<Aging>(["aging", "invoice"], "/reports/aging", { doc_type: "invoice" });
+  const ap = useOrgQuery<Aging>(["aging", "bill"], "/reports/aging", { doc_type: "bill" });
+  const pending = useOrgQuery<Page<Entry>>(["pending-count"], "/journal-entries", { pending: "true", page_size: "1" });
 
   const cash = useMemo(() => {
     if (!bs.data) return "0";
@@ -49,6 +54,7 @@ export default function Dashboard() {
       <Title sub={`${org!.name} · FY from ${fmtDate(start)}`}>Overview</Title>
       {error && <ErrorState message={(error as Error).message} retry={() => { bs.refetch(); pl.refetch(); }} />}
 
+      <SetupCard />
       {empty ? (
         <Card><EmptyState art="chart" title="Your books are empty" body="Record your first journal entry, for example the owner's capital investment, and this page will fill with live figures." action={can("accountant") ? <Link href="/journal/new"><Button>Record first entry</Button></Link> : undefined} /></Card>
       ) : (
@@ -77,6 +83,18 @@ export default function Dashboard() {
             <div role="alert" className="rounded-2xl bg-expense-soft p-4 text-sm text-expense"><b>The books are out of balance</b> by {money(bs.data.difference, cur, dp)}. Review recent entries.</div>
           )}
 
+          {(due.data?.length ?? 0) > 0 && (
+            <Link href="/recurring" className="tap flex items-center gap-3 rounded-3xl border border-gold/50 bg-gold-soft p-4 anim-rise">
+              <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-gold-gradient text-[#3b2a05]"><CalendarClock className="size-5" /></span>
+              <span className="min-w-0 flex-1"><span className="block font-semibold text-warning">{due.data!.length} recurring entr{due.data!.length === 1 ? "y is" : "ies are"} due</span><span className="block truncate text-xs text-muted">{due.data!.map((t) => t.name).join(", ")}</span></span>
+              <span className="text-sm font-bold text-warning">Create</span>
+            </Link>
+          )}
+          <section className="grid grid-cols-2 gap-3">
+            <Link href="/invoices?tab=aging"><Stat icon={<FileText />} label="Customers owe you" value={ar.data ? money(ar.data.totals.total, cur, dp) : null} /></Link>
+            <Link href="/invoices?tab=aging"><Stat icon={<FileText />} label="You owe suppliers" value={ap.data ? money(ap.data.totals.total, cur, dp) : null} /></Link>
+          </section>
+
           {ov.data && (
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
               <Card className="min-w-0 p-4 lg:col-span-2">
@@ -95,6 +113,7 @@ export default function Dashboard() {
                 <h2 className="font-display text-lg font-semibold">Books status</h2>
                 <Link href="/reconciliation" className="tap flex items-center justify-between rounded-2xl bg-surface-muted px-3 py-2.5 text-sm"><span className="font-semibold">Reconciliations</span><span className="text-muted">{ov.data.open_reconciliations.length ? `${ov.data.open_reconciliations.length} in progress` : "none open"}</span></Link>
                 <Link href="/journal?status=draft" className="tap flex items-center justify-between rounded-2xl bg-surface-muted px-3 py-2.5 text-sm"><span className="font-semibold">Draft entries</span><span className="text-muted">{ov.data.draft_count}</span></Link>
+                {(pending.data?.total ?? 0) > 0 && <Link href="/approvals" className="tap flex items-center justify-between rounded-2xl bg-gold-soft px-3 py-2.5 text-sm"><span className="font-semibold text-warning">Waiting for approval</span><span className="text-warning">{pending.data!.total}</span></Link>}
                 <Link href="/settings" className="tap flex items-center justify-between rounded-2xl bg-surface-muted px-3 py-2.5 text-sm"><span className="font-semibold">Current period</span><span className="flex items-center gap-1 text-muted">{ov.data.current_period ? <>{ov.data.current_period.status === "closed" && <Lock className="size-3.5" />}{ov.data.current_period.name}</> : "not set"}</span></Link>
               </Card>
             </div>

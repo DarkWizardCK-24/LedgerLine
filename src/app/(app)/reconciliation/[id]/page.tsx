@@ -5,6 +5,7 @@ import { ArrowLeft, CheckCircle2, FileUp, Link2, Plus, Sparkles, TriangleAlert, 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
+import { Hint, GLOSSARY } from "@/components/hint";
 import { Badge, Button, Card, Chips, ConfirmSheet, ErrorState, Field, Input, Select, Sheet, Skeleton, cx, useToast } from "@/components/ui";
 import { fmtDate, today } from "@/lib/dates";
 import { money } from "@/lib/money";
@@ -55,7 +56,7 @@ export default function ReconWorkspace() {
       <div>
         <div className="flex flex-wrap items-center gap-2"><h1 className="font-display text-2xl font-semibold lg:text-3xl">{s.account_name}</h1>
           <Badge tone={s.status === "completed" ? "brand" : s.status === "cancelled" ? "muted" : "gold"}>{s.status.replace("_", " ")}</Badge></div>
-        <p className="text-sm text-muted">{fmtDate(s.statement_start_date)} to {fmtDate(s.statement_end_date)}</p>
+        <p className="text-sm text-muted">{fmtDate(s.statement_start_date)} to {fmtDate(s.statement_end_date)} <Hint label="what is this?">{GLOSSARY.reconciliation}</Hint></p>
       </div>
 
       {/* the number that matters */}

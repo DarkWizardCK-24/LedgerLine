@@ -49,3 +49,25 @@ export function compact(value: string | number, currency: string): string {
 }
 
 export const isNegative = (v: string) => v.trim().startsWith("-");
+
+
+/** a * b / divisor in whole minor units, rounded half to even: exact arithmetic for invoice previews (the server is authoritative). */
+export function mulDiv(a: bigint, b: bigint, divisor: bigint): bigint {
+  const n = a * b;
+  const neg = n < 0n;
+  const abs = neg ? -n : n;
+  let q = abs / divisor;
+  const r2 = (abs % divisor) * 2n;
+  if (r2 > divisor || (r2 === divisor && q % 2n === 1n)) q += 1n;
+  return neg ? -q : q;
+}
+
+/** Net and tax for one invoice line: quantity (up to 4 decimals) x price, then tax at `rate` percent. */
+export function lineTotals(quantity: string, unitPrice: string, rate: string | null, decimals: number): { net: bigint; tax: bigint } | null {
+  const q = toMinor(quantity, 4), p = toMinor(unitPrice, decimals);
+  if (q === null || p === null) return null;
+  const net = mulDiv(q, p, 10_000n);
+  const r = rate ? toMinor(rate, 4) : 0n;
+  if (r === null) return null;
+  return { net, tax: mulDiv(net, r, 1_000_000n) };
+}

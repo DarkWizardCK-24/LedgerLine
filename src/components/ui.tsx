@@ -96,7 +96,7 @@ export function Chips<T extends string>({ value, onChange, options }: { value: T
     <div className="scroll-hide -mx-4 flex gap-2 overflow-x-auto px-4 pb-1" role="tablist">
       {options.map((o) => (
         <button
-          key={o.value} role="tab" aria-selected={value === o.value} onClick={() => onChange(o.value)}
+          key={o.value} type="button" role="tab" aria-selected={value === o.value} onClick={() => onChange(o.value)}
           className={cx("tap shrink-0 rounded-full border px-4 text-sm font-semibold transition",
             value === o.value ? "border-transparent bg-brand-gradient text-white" : "border-border bg-surface text-muted hover:text-foreground")}
         >

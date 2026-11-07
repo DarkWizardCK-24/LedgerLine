@@ -5,6 +5,7 @@ import { Lock, LockOpen, Plus, Trash2, UserPlus } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { OrgForm } from "@/components/org-form";
+import { ApprovalSettings, ScheduledReports, YearEndClose } from "@/components/settings-extra";
 import { Title } from "@/components/page";
 import { Badge, Button, Card, ConfirmSheet, Field, Input, Select, Sheet, Skeleton, useToast } from "@/components/ui";
 import { fmtDate } from "@/lib/dates";
@@ -42,6 +43,9 @@ function SettingsView() {
 
       {can("admin") && <Members call={call} callGlobal={callGlobal} guard={guard} orgId={org!.id} isOwner={org!.role === "owner"} />}
       <Periods canManage={can("admin")} call={call} guard={guard} />
+      {can("admin") && <ApprovalSettings />}
+      {can("admin") && <ScheduledReports />}
+      {can("admin") && <YearEndClose />}
       {can("accountant") && <Exports />}
 
       <Button variant="secondary" onClick={() => setCreating(true)}><Plus className="size-4" /> New organization</Button>
@@ -65,7 +69,7 @@ function Members({ call, guard, orgId, isOwner }: { call: Call; callGlobal: Call
 
   const add = async () => {
     setBusy(true); setErr(null);
-    try { await call(`/organizations/${orgId}/members`, { json: { email, role } }); await guard(async () => {}, "Member added."); setOpen(false); setEmail(""); }
+    try { const m = await call<Member>(`/organizations/${orgId}/members`, { json: { email, role } }); await guard(async () => {}, m.invited ? "Invitation e-mail sent." : "Member added."); setOpen(false); setEmail(""); }
     catch (e) { setErr(errorMessage(e)); } finally { setBusy(false); }
   };
 
@@ -87,7 +91,7 @@ function Members({ call, guard, orgId, isOwner }: { call: Call; callGlobal: Call
       </Card>
       <Sheet open={open} onClose={() => setOpen(false)} title="Add a team member" footer={<Button size="lg" className="w-full" loading={busy} disabled={!email.includes("@")} onClick={add}>Add member</Button>}>
         <div className="space-y-4 pb-2">
-          <p className="text-sm text-muted">They need a platform account first (the same one used for Ledgerly and Lensly).</p>
+          <p className="text-sm text-muted">They sign in with the same account used for Ledgerly and Lensly. If they don&apos;t have one yet and your server is set up for it, we e-mail them an invitation.</p>
           <Field label="Email">{(id) => <Input id={id} type="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@company.com" />}</Field>
           <Field label="Role" hint={ROLE_HELP[role]}>{(id) => <Select id={id} value={role} onChange={(e) => setRole(e.target.value as Role)}>{grantable.map((r) => <option key={r} value={r}>{r}</option>)}</Select>}</Field>
           {err && <p role="alert" className="rounded-2xl bg-expense-soft p-3 text-sm text-expense">{err}</p>}

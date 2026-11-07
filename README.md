@@ -37,6 +37,24 @@ Built mobile-first: a bottom tab bar with a raised "new entry" button, bottom sh
 |:--:|:--:|:--:|:--:|:--:|
 | <img src="docs/screenshots/ledgerline/mobile/12-reconciliation-list.png" width="130" /> | <img src="docs/screenshots/ledgerline/mobile/13-reconciliation-workspace.png" width="130" /> | <img src="docs/screenshots/ledgerline/mobile/14-reconciliation-match-sheet.png" width="130" /> | <img src="docs/screenshots/ledgerline/mobile/15-settings.png" width="130" /> | <img src="docs/screenshots/ledgerline/mobile/16-more-menu.png" width="130" /> |
 
+**Easier every day**
+
+| Add menu | Money in | Opening balances | Plain-language hints | Recurring entries |
+|:--:|:--:|:--:|:--:|:--:|
+| <img src="docs/screenshots/ledgerline/mobile/18-add-menu.png" width="150" /> | <img src="docs/screenshots/ledgerline/mobile/19-quick-money-in.png" width="150" /> | <img src="docs/screenshots/ledgerline/mobile/20-opening-balances.png" width="150" /> | <img src="docs/screenshots/ledgerline/mobile/30-plain-language-hint.png" width="150" /> | <img src="docs/screenshots/ledgerline/mobile/24-recurring.png" width="150" /> |
+
+**Invoices, bills and tax**
+
+| Invoices | An invoice | Who owes whom | GST summary |
+|:--:|:--:|:--:|:--:|
+| <img src="docs/screenshots/ledgerline/mobile/21-invoices.png" width="150" /> | <img src="docs/screenshots/ledgerline/mobile/22-invoice-detail.png" width="150" /> | <img src="docs/screenshots/ledgerline/mobile/23-aging.png" width="150" /> | <img src="docs/screenshots/ledgerline/mobile/27-gst.png" width="150" /> |
+
+**Planning, cash and control**
+
+| Cash flow | Budget vs actual | Import | Approvals |
+|:--:|:--:|:--:|:--:|
+| <img src="docs/screenshots/ledgerline/mobile/25-cash-flow.png" width="150" /> | <img src="docs/screenshots/ledgerline/mobile/26-budget-vs-actual.png" width="150" /> | <img src="docs/screenshots/ledgerline/mobile/28-import.png" width="150" /> | <img src="docs/screenshots/ledgerline/mobile/29-approvals.png" width="150" /> |
+
 ### On desktop
 
 A sidebar with dense tables and keyboard search (`Ctrl/⌘ K`), in light and dark mode.
@@ -52,6 +70,15 @@ A sidebar with dense tables and keyboard search (`Ctrl/⌘ K`), in light and dar
 | <img src="docs/screenshots/ledgerline/desktop/06-profit-and-loss.png" width="440" /> | <img src="docs/screenshots/ledgerline/desktop/07-balance-sheet.png" width="440" /> |
 | **Bank reconciliation** | **Settings: team, periods, exports** |
 | <img src="docs/screenshots/ledgerline/desktop/08-reconciliation.png" width="440" /> | <img src="docs/screenshots/ledgerline/desktop/09-settings.png" width="440" /> |
+
+| **Invoices and bills** | **An invoice** |
+| <img src="docs/screenshots/ledgerline/desktop/13-invoices.png" width="440" /> | <img src="docs/screenshots/ledgerline/desktop/14-invoice-detail.png" width="440" /> |
+| **New invoice** | **Recurring entries** |
+| <img src="docs/screenshots/ledgerline/desktop/18-new-invoice.png" width="440" /> | <img src="docs/screenshots/ledgerline/desktop/17-recurring.png" width="440" /> |
+| **Cash flow** | **Budget vs actual** |
+| <img src="docs/screenshots/ledgerline/desktop/15-cash-flow.png" width="440" /> | <img src="docs/screenshots/ledgerline/desktop/16-budget-vs-actual.png" width="440" /> |
+| **Overview with the setup checklist** | **Settings: team, approvals, e-mailed reports, year-end** |
+| <img src="docs/screenshots/ledgerline/desktop/12-dashboard-with-setup.png" width="440" /> | <img src="docs/screenshots/ledgerline/desktop/19-settings-team-and-controls.png" width="440" /> |
 
 **Tablet**
 
@@ -77,8 +104,32 @@ Vector originals: [`logo.svg`](docs/branding/logo.svg) and [`logo-wordmark.svg`]
 
 ## Features
 
+### Easy for everyone
+- **Money in / Money out / Transfer:** one short form (amount, what it was for, where the money went). The balanced entry is made for you, so you never need to know what a debit is. The full journal is always one tap away
+- **Shortcuts and "repeat last":** save a form as a shortcut (Monthly rent, Weekly sales) and refill it with one tap
+- **Receipts:** take a photo with your phone or attach a PDF to any entry; photos are shrunk on the phone so they upload fast
+- **Guided first run:** a short checklist (opening balances, first transaction, invite your accountant) and plain-language hints wherever an accounting word appears
+- **Opening balances:** enter what you already have and owe on your start day; the rest goes to owner's capital, shown clearly before you save
+- **Recurring entries:** rent, salaries and EMIs repeat on a schedule; you get a reminder when one is due and create it with one tap, or let it post automatically
+
+### Invoices, bills and tax
+- **Sales invoices and purchase bills** with customers and suppliers, line items, due dates and a live total
+- **Payments**, including part payments; each one updates your books and what is still owed. Mistakes are fixed by voiding, never by editing history
+- **"Who owes whom":** receivables and payables aging (not due, 1 to 30, 31 to 60, 61 to 90, 90+ days late), with a CSV download
+- **GST:** standard 0, 5, 12, 18 and 28% rates for sales and purchases, GST charged vs claimable, and a summary of what to pay
+
+### Planning and cash
+- **Cash-flow statement:** where your cash and bank balances came from and went, split into operating, investing and financing, always reconciled to your books
+- **Budgets:** a monthly budget for each income and expense account, and a budget-vs-actual report with a progress bar per account
+
+### Bring your data in
+- **From Lensly:** turn a reviewed bank statement into entries, matching each category to an account
+- **From Ledgerly:** import a CashBook the same way
+- **From a file:** Excel or CSV, including a Tally-style day book, checked before anything is saved
+- Everything arrives as **drafts** you review, then post all at once. Importing twice never duplicates a row
+
 ### Journal
-- Record entries with any number of lines, each a debit or a credit, with live totals and a clear *balanced / out by …* indicator
+- For full control, record entries with any number of lines, each a debit or a credit, with live totals and a clear *balanced / out by …* indicator
 - Save drafts, edit them, discard them, then post when ready
 - Entries get gapless numbers (JE-000001, JE-000002 …) when posted
 - Posted entries can never be edited or deleted; corrections are a linked **reversal** entry, so the history stays intact
@@ -105,8 +156,11 @@ Vector originals: [`logo.svg`](docs/branding/logo.svg) and [`logo-wordmark.svg`]
 
 ### Control and teamwork
 - **Roles:** viewer, accountant, admin and owner, each with clear permissions
-- Add team members by email and change their role at any time
+- Add team members by email and change their role at any time; people without an account yet can be sent an invitation e-mail
+- **Approvals:** optionally require a second person to approve entries before they count; reviewers can send an entry back with a note
 - **Financial periods:** close a period to lock its dates, reopen it when needed
+- **Year-end close:** move the year's profit into retained earnings and lock the year, with a preview first
+- **Reports by e-mail:** schedule a weekly or monthly PDF to your accountant
 - **Audit history** of every important action, with before and after values
 - Several organizations in one account, with a quick switcher
 

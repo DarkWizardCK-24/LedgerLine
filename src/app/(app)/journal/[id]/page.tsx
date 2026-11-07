@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { EntryEditor } from "@/components/entry-editor";
+import { EntryReceipts } from "@/components/receipts";
 import { Amt } from "@/components/page";
 import { Badge, Button, Card, ConfirmSheet, ErrorState, Field, Input, Sheet, Skeleton, useToast } from "@/components/ui";
 import { fmtDate, today } from "@/lib/dates";
@@ -22,6 +23,7 @@ export default function EntryPage() {
   const toast = useToast();
   const q = useOrgQuery<Entry>(["entry", id], `/journal-entries/${id}`);
   const e = q.data;
+  const settings = useOrgQuery<{ approval_mode: string }>(["settings"], "/accounting/settings");
   const [editing, setEditing] = useState(false);
   const [confirm, setConfirm] = useState<null | "post" | "discard">(null);
   const [revOpen, setRevOpen] = useState(false);
@@ -79,6 +81,8 @@ export default function EntryPage() {
             </div>
           </Card>
 
+          {e.review_note && e.status === "draft" && <p role="status" className="rounded-2xl bg-gold-soft p-3 text-sm text-warning"><b>Sent back:</b> {e.review_note}</p>}
+          {e.submitted_at && e.status === "draft" && <p role="status" className="rounded-2xl bg-brand-soft p-3 text-sm text-brand-strong">Waiting for approval since {new Date(e.submitted_at).toLocaleDateString()}.</p>}
           {err && <p role="alert" className="rounded-2xl bg-expense-soft p-3 text-sm text-expense">{err}</p>}
 
           {canEdit && e.status === "draft" && (
@@ -88,9 +92,13 @@ export default function EntryPage() {
               <Button disabled={!e.is_balanced} onClick={() => setConfirm("post")}><CheckCircle2 className="size-5" /> Post entry</Button>
             </div>
           )}
+          {canEdit && e.status === "draft" && !e.submitted_at && settings.data && settings.data.approval_mode !== "off" && (
+            <Button variant="secondary" className="w-full" onClick={() => run(() => call(`/journal-entries/${e.id}/submit`, { method: "POST" }), "Submitted for approval.")}>Submit for approval</Button>
+          )}
           {canEdit && e.status === "posted" && !e.reverses_entry_id && (
             <Button variant="secondary" className="w-full sm:w-auto" onClick={() => { setRevDate(e.entry_date); setRevOpen(true); }}><Undo2 className="size-4" /> Reverse entry</Button>
           )}
+          <EntryReceipts entryId={e.id} canEdit={canEdit} />
           {e.status !== "draft" && <p className="flex items-center gap-1.5 text-xs text-muted"><RotateCcw className="size-3.5" /> Posted entries can&apos;t be edited. Corrections are made by reversal, which keeps a full audit trail.</p>}
         </>
       )}

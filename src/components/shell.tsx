@@ -1,26 +1,32 @@
 "use client";
 
-import { ArrowLeftRight, BookOpen, Check, ChevronsUpDown, FileBarChart, History, Home, ListTree, LogOut, MoreHorizontal, Plus, ScrollText, Search, Settings } from "lucide-react";
+import { ArrowLeftRight, BookOpen, CalendarClock, Check, ChevronsUpDown, FileBarChart, FileInput, FileText, History, Home, ListTree, LogOut, MoreHorizontal, Plus, ScrollText, Search, Settings, ShieldCheck, Target } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { useOrg } from "@/lib/org";
 import { Logo, Glyph } from "./logo";
+import { AddMenu } from "./add-menu";
 import { SearchSheet, useSearchShortcut } from "./search";
 import { Sheet, cx } from "./ui";
 
 const MAIN = [
   { href: "/", label: "Home", icon: Home },
   { href: "/journal", label: "Journal", icon: BookOpen },
+  { href: "/invoices", label: "Invoices", icon: FileText },
   { href: "/ledger", label: "Ledger", icon: ScrollText },
   { href: "/reports", label: "Reports", icon: FileBarChart },
   { href: "/reconciliation", label: "Reconcile", icon: ArrowLeftRight },
   { href: "/accounts", label: "Accounts", icon: ListTree },
+  { href: "/recurring", label: "Recurring", icon: CalendarClock },
+  { href: "/budgets", label: "Budgets", icon: Target },
+  { href: "/import", label: "Import", icon: FileInput },
+  { href: "/approvals", label: "Approvals", icon: ShieldCheck },
   { href: "/audit", label: "Audit", icon: History },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
-const MORE = MAIN.filter((i) => ["/ledger", "/accounts", "/reconciliation", "/audit", "/settings"].includes(i.href));
+const MORE = MAIN.filter((i) => ["/invoices", "/ledger", "/accounts", "/reconciliation", "/recurring", "/budgets", "/import", "/approvals", "/audit", "/settings"].includes(i.href));
 
 const active = (path: string, href: string) => (href === "/" ? path === "/" : path === href || path.startsWith(href + "/"));
 
@@ -72,6 +78,8 @@ export function AppShell({ children, title }: { children: React.ReactNode; title
   const { displayName, email, signOut } = useAuth();
   const [more, setMore] = useState(false);
   const [searching, setSearching] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const { can } = useOrg();
   useSearchShortcut(() => setSearching(true));
   const router = useRouter();
   const moreActive = MORE.some((m) => active(path, m.href));
@@ -92,9 +100,9 @@ export function AppShell({ children, title }: { children: React.ReactNode; title
             </Link>
           ))}
         </nav>
-        <Link href="/journal/new" className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-gold-gradient font-bold text-[#3b2a05] shadow-[0_10px_22px_-10px_rgb(217_154_27/0.8)] transition hover:brightness-105">
-          <Plus className="size-5" /> New journal entry
-        </Link>
+        <button type="button" onClick={() => setAdding(true)} disabled={!can("accountant")} className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-gold-gradient font-bold text-[#3b2a05] shadow-[0_10px_22px_-10px_rgb(217_154_27/0.8)] transition hover:brightness-105 disabled:opacity-50">
+          <Plus className="size-5" /> Add transaction
+        </button>
         <div className="flex items-center gap-3 rounded-2xl border border-border p-2.5">
           <Avatar name={displayName} />
           <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold">{displayName}</p><p className="truncate text-xs text-muted">{email}</p></div>
@@ -126,9 +134,11 @@ export function AppShell({ children, title }: { children: React.ReactNode; title
             <li key={href}><Tab href={href} label={label} Icon={Icon} on={active(path, href)} /></li>
           ))}
           <li className="grid place-items-center">
-            <Link href="/journal/new" aria-label="New journal entry" className="-mt-7 grid size-[58px] place-items-center rounded-full bg-gold-gradient text-[#3b2a05] shadow-[0_12px_24px_-8px_rgb(217_154_27/0.9)] ring-4 ring-background transition active:scale-95">
-              <Plus className="size-7" strokeWidth={2.6} />
-            </Link>
+            {can("accountant") ? (
+              <button type="button" onClick={() => setAdding(true)} aria-label="Add a transaction" className="-mt-7 grid size-[58px] place-items-center rounded-full bg-gold-gradient text-[#3b2a05] shadow-[0_12px_24px_-8px_rgb(217_154_27/0.9)] ring-4 ring-background transition active:scale-95">
+                <Plus className="size-7" strokeWidth={2.6} />
+              </button>
+            ) : <span aria-hidden className="size-[58px]" />}
           </li>
           <li><Tab href="/reports" label="Reports" Icon={FileBarChart} on={active(path, "/reports")} /></li>
           <li>
@@ -140,6 +150,7 @@ export function AppShell({ children, title }: { children: React.ReactNode; title
       </nav>
 
       <SearchSheet open={searching} onClose={() => setSearching(false)} />
+      <AddMenu open={adding} onClose={() => setAdding(false)} />
       <Sheet open={more} onClose={() => setMore(false)} title="More">
         <div className="mb-4 flex items-center gap-3 rounded-2xl bg-surface-muted p-3">
           <Avatar name={displayName} />

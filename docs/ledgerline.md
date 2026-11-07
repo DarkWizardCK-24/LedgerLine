@@ -109,6 +109,47 @@ Because they share one Supabase project, one account signs in to all three apps.
 
 **Before Ledgerline works against the deployed backend:** the instance at `https://finance-backend-miln.onrender.com` serves the CashBook and Analyzer routes only (checked via its `/openapi.json`: no `/organizations`, `/accounts`, `/journal-entries`, `/reconciliations` or `/reports/trial-balance`). To enable Ledgerline you must (1) apply `20261022000004_ledger_core.sql` and `20261023000005_ledger_reconciliation.sql` to the Supabase database, (2) deploy the updated `backend/` (it is its own git repository, `Finance-Backend`), and (3) add the Ledgerline web origin to the backend's `CORS_ORIGINS`. Until then, sign-in succeeds but every accounting request returns 404.
 
+### Endpoints added in the second release
+| Area | Endpoints |
+|---|---|
+| Quick entry | `POST /journal-entries/quick`, `GET /accounting/recent-simple` |
+| Templates and recurring | `GET/POST /templates`, `PATCH/DELETE /templates/{id}`, `POST /templates/{id}/use|run`, `GET /recurring/due`, `POST /recurring/run-due` |
+| Setup and settings | `GET /accounting/setup-status`, `POST /accounting/opening-balances`, `GET/PATCH /accounting/settings`, `GET /accounting/capabilities` |
+| Approvals | `POST /journal-entries/{id}/submit|reject`, `POST /journal-entries/bulk-post`, `GET /journal-entries?pending=true` |
+| Receipts | `GET/POST /journal-entries/{id}/attachments`, `GET/DELETE /journal-entries/{id}/attachments/{aid}` |
+| Contacts and tax | `GET/POST /contacts`, `PATCH /contacts/{id}`, `GET/POST /tax-codes`, `POST /tax-codes/seed-gst` |
+| Invoices and bills | `GET/POST /invoices|bills`, `GET/PATCH/DELETE /invoices|bills/{id}`, `POST …/{id}/issue|void|payments`, `POST …/{id}/payments/{pid}/void` |
+| Reports | `GET /reports/aging`, `/reports/gst-summary` (CSV too), `/reports/cash-flow`, `/reports/budget-vs-actual` |
+| Budgets | `GET/PUT /account-budgets` |
+| Import | `GET /integrations/lensly/reports`, `/integrations/ledgerly/books` (+ `/{id}/preview`), `POST /integrations/import`, `POST /journal-entries/import-file` |
+| E-mail and year-end | `GET/POST /report-schedules`, `DELETE /report-schedules/{id}`, `POST /report-schedules/run-due`, `GET /accounting/year-end/preview`, `POST /accounting/year-end` |
+
+Note: budgets live at `/account-budgets` because `/budgets` already belongs to Lensly.
+
+## Running the SQL in Supabase
+
+Ledgerline lives in its own Postgres schema, `ledger`, in the **same Supabase project** as Ledgerly and Lensly. It needs **three** SQL files, run **once each, in this order**. The first three migrations (foundation, CashBook, Analyzer) are prerequisites and are already applied if Ledgerly and Lensly work.
+
+| Order | File (in `supabase/migrations/`) | What it creates |
+|---|---|---|
+| 1 | `20261022000004_ledger_core.sql` | the `ledger` schema: organizations, members, accounts, journal entries and lines, financial periods, audit log, plus the triggers that make posted entries immutable |
+| 2 | `20261023000005_ledger_reconciliation.sql` | bank reconciliation and export history |
+| 3 | `20261024000006_ledger_features.sql` | templates and recurring entries, receipts, contacts, tax codes, invoices and bills with payments, budgets, scheduled reports, approvals and year-end closing columns |
+
+**How:** Supabase dashboard, SQL Editor, New query. Paste one file, press Run, wait for "Success", then do the next file. (Or, with the Supabase CLI linked to the project, `supabase db push` runs whatever is missing in order.) The files are not re-runnable: a second run fails with "already exists". That is safe, it changes nothing.
+
+**Check it worked** (SQL Editor):
+
+```sql
+select count(*) from information_schema.tables where table_schema = 'ledger';   -- expect 20
+select tablename from pg_tables where schemaname = 'ledger' and not rowsecurity; -- expect no rows (RLS is on everywhere)
+```
+
+**Then:**
+1. Do **not** add `ledger` to Settings, API, "Exposed schemas". All access goes through the backend.
+2. Redeploy the backend (it must include the new routes) and add the Ledgerline web address to its `CORS_ORIGINS`.
+3. Optional, for e-mail features: configure SMTP in Supabase Auth (so invitations are delivered) and set `SMTP_HOST`, `SMTP_FROM` (and user, password) on the backend for scheduled report e-mails.
+
 ## Running it locally
 ```
 # backend (real Postgres 16 bundled via pgserver; sign-in is NOT real here)
@@ -136,5 +177,7 @@ npm install && npm run dev
 ## Known limits
 - Sign-in against a real Supabase project, and the Supabase-hosted database, have **not** been exercised from this machine (see the platform README). Everything else ran on SQLite and a real PostgreSQL 16.
 - No year-end closing entries (retained earnings are derived at report time). One base currency per organization. PDF uses built-in Latin-1 fonts, so currency prints as its ISO code and non-Latin names are replaced with `?`.
-- Member invitations require the person to already have an account; there is no e-mailed invite.
+- Invitation e-mails and scheduled report e-mails need Supabase Auth e-mail and an SMTP server; they were tested against mocks, not against a real mail server.
+- Multi-currency is not built: each organization has one base currency.
+- Receipts are stored in PostgreSQL (up to 5 MB each, 10 per entry), which keeps them in the same backups as the ledger.
 - Not verified: iOS Safari / real devices, browsers other than Chromium, a screen-reader pass.

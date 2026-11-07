@@ -150,7 +150,7 @@ async function api(method, p, org, data) {
   ok(dl2[0].suggestedFilename() === 'profit-and-loss.csv', `CSV export downloads (${dl2[0].suggestedFilename()})`);
 
   await page.goto(WEB + '/settings'); await page.waitForSelector('text=Financial periods');
-  await page.getByRole('button', { name: 'Add' }).last().click();
+  await page.getByRole('button', { name: 'Add' }).nth(1).click();
   await page.getByLabel('Name', { exact: true }).fill('April 2026'); await page.getByLabel('Starts').fill('2026-04-01'); await page.getByLabel('Ends').fill('2026-04-30');
   await page.getByRole('button', { name: 'Create period' }).click(); await page.waitForSelector('text=Period created.');
   await page.getByRole('button', { name: 'Close', exact: true }).click(); await page.getByRole('button', { name: 'Close period' }).click();
