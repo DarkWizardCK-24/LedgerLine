@@ -6,6 +6,7 @@
 
 Ledgerline is a double-entry accounting app for small businesses. Record transactions as balanced journal entries, and get the ledger, trial balance, profit & loss and balance sheet instantly, calculated from your books and never typed in by hand.
 
+[![CI](https://github.com/DarkWizardCK-24/LedgerLine/actions/workflows/ci.yml/badge.svg)](https://github.com/DarkWizardCK-24/LedgerLine/actions/workflows/ci.yml) [![Live demo](https://img.shields.io/badge/Live-demo-2ea44f?logo=vercel&logoColor=white)](https://ledgerline-alpha-five.vercel.app)
 ![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
 ![Tailwind](https://img.shields.io/badge/Tailwind-4-06B6D4?logo=tailwindcss&logoColor=white)
