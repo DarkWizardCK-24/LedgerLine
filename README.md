@@ -16,6 +16,8 @@ Ledgerline is a double-entry accounting app for small businesses. Record transac
 
 </div>
 
+<p align="center"><img src="docs/thumbnails/ledgerline-thumb-1-hero.png" alt="Ledgerline: double-entry accounting for small businesses, shown on phones with the journal, profit and loss and bank reconciliation" width="900"></p>
+
 ---
 
 Part of the **Finance Platform**, alongside **Ledgerly** (multi-ledger CashBook) and **Lensly** (statement analyzer). One account signs in to all three.
